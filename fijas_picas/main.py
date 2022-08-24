@@ -27,20 +27,21 @@ class Agent:
         while not self.is_finished():
             n = self.get_question()
             print(n)
+
+            picas_fijas_user = Game.get_picas_fijas_user().split(",")
+            picas_fijas_user = f"{picas_fijas_user[1]} {picas_fijas_user[0]}"
+
             # should be a tuple of two numbers
-            answer = tuple([int(i) for i in re.findall(r'[0-9]+', Game.get_picas_fijas_user())])
+            answer = tuple([int(i) for i in re.findall(r'[0-9]+', picas_fijas_user)])
             self.put_answer(answer)
             print("A")
 
-        if self.is_correct():
-            print(self.guessed_number())
-        else:
-            self.compute_agent_answer_picas_fijas()
+        print(self.guessed_number())
 
     def compute_agent_answer_picas_fijas(self):
         """
-        Lunch the game ([#] option) and ask the number of "picas" and "fijas" in the user's number.
-        :return: The number of "picas" and "fijas" in the user's number.
+        Lunch the game ([#] option) and ask numbers that must be consistent with the machine's number.
+        :return: The number of picas and fijas in the machine's number.
         """
         print("R")
         while self.response[0] != 4:
@@ -246,10 +247,7 @@ class Game:
         Gets the number of picas and fijas the user has in their number.
         :return: The number of picas and fijas the user has in their number.
         """
-        user_picas_fijas = input().split(",")
-        user_picas_fijas = f"{user_picas_fijas[1]} {user_picas_fijas[0]}"
-
-        return user_picas_fijas
+        return input()
 
     @staticmethod
     def get_user_number():
