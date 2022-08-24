@@ -15,41 +15,59 @@ class Agent:
         self.last_question = None
         self.history = []
         self.i = 0
+        self.j = True
         self.current_allowed_numbers = set(self.ALL_NUMBERS)
         self.response = (0, 0)
         self.number_generated = self.number_generator()
 
-    def compute_agent_guess_user_number(self):
+    def compute(self):
         """
         Lunch the game ([S] option) and ask the number of "picas" and "fijas" in the user's number.
         """
+
+        n_quest = self.get_question()
+
         print("R")
+
         while not self.is_finished():
-            n = self.get_question()
-            print(n)
+            if self.j:
+                print(n_quest)
 
-            picas_fijas_user = Game.get_picas_fijas_user().split(",")
-            picas_fijas_user = f"{picas_fijas_user[1]} {picas_fijas_user[0]}"
+            picas_fijas_user = Game.get_picas_fijas_user()
 
-            # should be a tuple of two numbers
-            answer = tuple([int(i) for i in re.findall(r'[0-9]+', picas_fijas_user)])
-            self.put_answer(answer)
-            print("A")
+            if "," in picas_fijas_user:
+                picas_fijas_user = picas_fijas_user.split(",")
+                formatted_picas_fijas_user = f"{picas_fijas_user[1]} {picas_fijas_user[0]}"
 
-        print(self.guessed_number())
+                if picas_fijas_user[1] != "4":
+                    # should be a tuple of two numbers
+                    answer = tuple([int(i) for i in re.findall(r'[0-9]+', formatted_picas_fijas_user)])
+                    self.put_answer(answer)
+                    try:
+                        n_quest = self.get_question()
+                    except:
+                        n_quest = self.guessed_number()
+                    print("A")
+                else:
+                    print(n_quest)
+                    self.j = False
 
-    def compute_agent_answer_picas_fijas(self):
-        """
-        Lunch the game ([#] option) and ask numbers that must be consistent with the machine's number.
-        """
-        print("R")
-        while self.response[0] != 4:
-            self.i += 1
-            n = Game.get_user_number().zfill(4)
-            self.response = self.response_picas_fijas(self.number_generated, n)
-            print(f"{self.response[1]},{self.response[0]}")
+            elif "#" in picas_fijas_user:
+                self.i += 1
+                n = Game.get_user_number().zfill(4)
+                self.response = self.response_picas_fijas(self.number_generated, n)
+                print(f"{self.response[1]},{self.response[0]}")
 
-        print(self.number_generated)
+                if self.response[0] == 4:
+                    print(self.number_generated)
+
+            elif "S" in picas_fijas_user:
+                self.j = True
+                Game.lunch(Game())
+                break
+
+        if self.is_finished():
+            print(self.guessed_number())
 
     def is_finished(self):
         """
@@ -234,11 +252,14 @@ class Game:
         while True:
             answer = input()
             if answer == "S":
-                self.__init__()
-                self.agent.compute_agent_guess_user_number()
-            elif answer == "#":
-                self.__init__()
-                self.agent.compute_agent_answer_picas_fijas()
+                self.lunch()
+
+    def lunch(self):
+        """
+        Lunch the game.
+        """
+        self.__init__()
+        self.agent.compute()
 
     @staticmethod
     def get_picas_fijas_user():
