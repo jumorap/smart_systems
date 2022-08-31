@@ -24,15 +24,11 @@ class Agent:
         """
         Lunch the game ([S] option) and ask the number of "picas" and "fijas" in the user's number.
         """
-
         n_quest = self.get_question()
 
         print("R")
 
         while not self.is_finished():
-            if self.j:
-                print(n_quest)
-
             picas_fijas_user = Game.get_picas_fijas_user()
 
             if "," in picas_fijas_user:
@@ -52,14 +48,17 @@ class Agent:
                     print(n_quest)
                     self.j = False
 
-            elif "#" in picas_fijas_user:
+            elif len(picas_fijas_user) == 4:
                 self.i += 1
-                n = Game.get_user_number().zfill(4)
+                n = picas_fijas_user.zfill(4)
                 self.response = self.response_picas_fijas(self.number_generated, n)
                 print(f"{self.response[1]},{self.response[0]}")
 
                 if self.response[0] == 4:
                     print(self.number_generated)
+
+            elif "#" in picas_fijas_user:
+                print(n_quest)
 
             elif "S" in picas_fijas_user:
                 self.j = True
